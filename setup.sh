@@ -4,7 +4,7 @@ sudo apt install mysql-server -y
 sudo apt install phpmyadmin -y
 
 sudo mysql
-CREATE USER 'admin'@'localhost' IDENTIFIED BY 'passadmin';
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'Abcd1234$';
 GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 exit

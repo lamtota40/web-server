@@ -1,8 +1,6 @@
 sudo apt update -y
-sudo apt install apache2 -y
-sudo apt install php php-curl libapache2-mod-php -y
-sudo apt install mysql-server -y
-sudo apt install phpmyadmin -y
+sudo apt install apache2 php php-curl libapache2-mod-php -y
+sudo apt install mysql-server phpmyadmin -y
 
 sudo mysql
 CREATE USER 'admin'@'localhost' IDENTIFIED BY 'Abcd1234$';

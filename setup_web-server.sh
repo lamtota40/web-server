@@ -81,8 +81,8 @@ EOF
 
         # Setup user MySQL
         sudo mysql <<EOF
-CREATE USER IF NOT EXISTS 'admin'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
-GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
+CREATE USER IF NOT EXISTS 'web'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
+GRANT ALL PRIVILEGES ON *.* TO 'web'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 EXIT
 EOF
@@ -98,7 +98,7 @@ EOF
     2)
         echo "Pilihan anda: Install SSL Certificate HTTPS"
         echo "jika gagal setting DNS tambahkan CAA : 0 issue "letsencrypt.org""
-        read -p "Masukkan domain kamu (contoh: example.com): " domain
+        read -p "Masukkan domain kamu (contoh: mydomain.com): " domain
         email="admin@$domain"
 
         # Cek apakah apache2 atau nginx terinstall

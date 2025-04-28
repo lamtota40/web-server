@@ -7,6 +7,7 @@ fi
 
 sudo apt update -y
 
+while true; do
 clear
 echo "======================================"
 echo "        Menu Instalasi Server         "
@@ -16,6 +17,7 @@ echo "1. Install Web Server"
 echo "2. Install FTP/FTPS"
 echo "3. Certificate Web (HTTPS)"
 echo "4. Uninstall ALL"
+echo "0. Untuk KELUAR"
 echo ""
 echo "======================================"
 read -p "Masukan input anda: " pilihan
@@ -47,6 +49,7 @@ case $pilihan in
                 sudo apt install apache2 php libapache2-mod-php -y
                 sudo systemctl enable apache2
                 sudo systemctl restart apache2
+                read -p "Tekan [Enter] untuk kembali ke menu utama..."
                 ;;
             2)
                 echo "Anda memilih Nginx (LEMP)"
@@ -57,11 +60,10 @@ case $pilihan in
                 sudo systemctl restart php7.4-fpm || sudo systemctl restart php8.1-fpm
                 sudo rm -f /var/www/html/index.nginx-debian.html
 
-                # Untuk phpmyadmin di nginx nanti perlu konfigurasi manual
+                read -p "Tekan [Enter] untuk kembali ke menu utama..."
                 ;;
             *)
-                echo "Pilihan tidak tersedia!"
-                exit 1
+                read -p "Tekan [Enter] untuk kembali ke menu utama..."
                 ;;
         esac
 
@@ -92,6 +94,7 @@ sudo sed -i 's/#\s*chroot_local_user=YES/chroot_local_user=YES/' /etc/vsftpd.con
 echo "allow_writeable_chroot=YES" | sudo tee -a /etc/vsftpd.conf
 sudo systemctl restart vsftpd
 sudo systemctl enable vsftpd
+read -p "Tekan [Enter] untuk kembali ke menu utama..."
         ;;
     3)
         echo "Pilihan anda: Install SSL Certificate HTTPS"
@@ -113,6 +116,7 @@ sudo systemctl enable vsftpd
         else
             echo "Anda belum menginstal Web Server (Apache atau Nginx)."
         fi
+        read -p "Tekan [Enter] untuk kembali ke menu utama..."
         ;;
 4)
     read -p "Apakah kamu yakin akan meng-uninstall semua (y/n): " uninstall
@@ -184,16 +188,25 @@ EOF
                     sudo userdel -r admin
                 fi
             echo "Uninstall selesai!"
+            read -p "Tekan [Enter] untuk kembali ke menu utama..."
             ;;
         n|N)
-            echo "Batal uninstall. Kembali ke menu..."
+            echo "Batal uninstall..."
+            read -p "Tekan [Enter] untuk kembali ke menu utama..."
             ;;
         *)
             echo "Pilihan tidak valid!"
+            read -p "Tekan [Enter] untuk kembali ke menu utama..."
             ;;
     esac
     ;;
+            0)
+            echo "Keluar dari program."
+            exit 0
+            ;;
     *)
         echo "Pilihan tidak tersedia!"
+        read -p "Tekan [Enter] untuk kembali ke menu utama..."
         ;;
 esac
+done

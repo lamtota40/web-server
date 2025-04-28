@@ -6,6 +6,11 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 sudo apt update -y
+if ! id "admin" &>/dev/null; then
+        sudo useradd -m -d /var/www/html -s /bin/bash admin || true
+        echo "admin:Abcd1234!" | sudo chpasswd
+        sudo chown -R admin:admin /var/www/html
+        fi
 clear
 echo "======================================"
 echo "        Menu Instalasi Server         "
@@ -91,9 +96,6 @@ sudo sed -i 's/#\s*chroot_local_user=YES/chroot_local_user=YES/' /etc/vsftpd.con
 echo "allow_writeable_chroot=YES" | sudo tee -a /etc/vsftpd.conf
 sudo systemctl restart vsftpd
 sudo systemctl enable vsftpd
-        sudo useradd -m -d /var/www/html -s /bin/bash admin || true
-        echo "admin:Abcd1234!" | sudo chpasswd
-        sudo chown -R admin:admin /var/www/html
         ;;
     3)
         echo "Pilihan anda: Install SSL Certificate HTTPS"
@@ -126,8 +128,7 @@ sudo systemctl enable vsftpd
             if systemctl list-units --type=service | grep -q mysql; then
                 echo "Uninstalling MySQL dan PHPMyAdmin..."
                 sudo mysql <<EOF
-DROP USER IF EXISTS 'admin'@'localhost';
-FLUSH PRIVILEGES;
+DROP USER IF EXISTS 'admin'@'LEGES;
 EXIT
 EOF
                 sudo chown -R root:root /var/www/html
@@ -171,10 +172,6 @@ EOF
                 echo "Uninstalling FTP/FTPS..."
                 sudo systemctl stop vsftpd
                 sudo systemctl disable vsftpd
-                
-                if id "admin" &>/dev/null; then
-                    sudo userdel -r admin
-                fi
 
                 if [ -f /etc/vsftpd.conf.bak ]; then
                     sudo mv /etc/vsftpd.conf.bak /etc/vsftpd.conf
@@ -185,6 +182,11 @@ EOF
             # Cleanup
             sudo apt autoremove -y
             sudo apt autoclean
+            
+            #remove user admin
+                if id "admin" &>/dev/null; then
+                    sudo userdel -r admin
+                fi
             echo "Uninstall selesai!"
             ;;
         n|N)

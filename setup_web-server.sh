@@ -184,6 +184,31 @@ fi
 sudo apt autoremove -y
 sudo apt autoclean
 
+
+
+sudo systemctl stop vsftpd
+sudo systemctl disable vsftpd
+
+sudo rm -f /etc/ssl/certs/vsftpd-selfsigned.crt
+sudo rm -f /etc/ssl/private/vsftpd-selfsigned.key
+
+
+if id "admin" &>/dev/null; then
+    echo "Menghapus user admin..."
+    sudo userdel -r admin
+else
+    echo "User admin tidak ditemukan, dilewati."
+fi
+
+if [ -f /etc/vsftpd.conf.bak ]; then
+    sudo mv /etc/vsftpd.conf.bak /etc/vsftpd.conf
+else
+    echo "Backup vsftpd.conf tidak ditemukan, dilewati."
+fi
+sudo rm -f /etc/vsftpd.userlist
+
+sudo apt remove --purge -y vsftpd openssl
+
 echo "Uninstall selesai!"
 
 

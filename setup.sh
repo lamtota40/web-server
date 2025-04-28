@@ -1,5 +1,5 @@
 sudo apt update -y
-sudo apt install apache2 php php-curl libapache2-mod-php -y
+sudo apt install apache2 php php-curl libapache2-mod-php php-mysql -y
 sudo apt install mysql-server phpmyadmin -y
 
 sudo mysql <<EOF

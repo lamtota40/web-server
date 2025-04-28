@@ -5,21 +5,6 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 sudo apt update -y
-sudo apt install php-curl php-mysql certbot python python3 -y
-sudo apt install mysql-server phpmyadmin -y
-
-sudo chown -R www-data:www-data /var/www/html
-sudo chmod -R 755 /var/www/html
-
-sudo mysql <<EOF
-CREATE USER 'admin'@'localhost' IDENTIFIED BY 'Abcd1234!';
-GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-EXIT
-EOF
-sudo systemctl enable mysql
-sudo systemctl restart mysql
-
 clear
 echo "======================================"
 echo "        Menu Instalasi Server         "
@@ -49,6 +34,21 @@ case $pilihan in
                 sudo apt install apache2 php libapache2-mod-php -y
                 sudo systemctl enable apache2
                 sudo systemctl restart apache2
+                
+                sudo apt install php-curl php-mysql certbot python python3 -y
+sudo apt install mysql-server phpmyadmin -y
+
+sudo chown -R www-data:www-data /var/www/html
+sudo chmod -R 755 /var/www/html
+
+sudo mysql <<EOF
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'Abcd1234!';
+GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+EXIT
+EOF
+sudo systemctl enable mysql
+sudo systemctl restart mysql
                 ;;
             2)
                 echo "Anda memilih Nginx (LEMP)"
@@ -58,6 +58,21 @@ case $pilihan in
                 sudo systemctl restart nginx
                 sudo systemctl restart php7.4-fpm || sudo systemctl restart php8.1-fpm
                 sudo rm -f /var/www/html/index.nginx-debian.html
+
+                sudo apt install php-curl php-mysql certbot python python3 -y
+sudo apt install mysql-server phpmyadmin -y
+
+sudo chown -R www-data:www-data /var/www/html
+sudo chmod -R 755 /var/www/html
+
+sudo mysql <<EOF
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'Abcd1234!';
+GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+EXIT
+EOF
+sudo systemctl enable mysql
+sudo systemctl restart mysql
                 ;;
             *)
                 echo "Pilihan tidak tersedia!"
@@ -131,17 +146,13 @@ elif systemctl list-units --type=service | grep -q nginx; then
 else
     echo "Anda belum menginstal Web Server (Apache atau Nginx)."
 fi
-
         ;;
     4)
-        echo "Pilihan anda: Uninstall semua"
-        # Nanti di sini kamu isi script uninstall
-        ;;
-    *)
-        echo "Pilihan tidak tersedia!"
-        ;;
-esac
-
+        read -p "Apakah kamu yakin akan mengunistall (y/n): " uninstall
+        case $uninstall in
+        y)
+        #uninstal mysql
+if systemctl list-units --type=service | grep -q mysql; then
 sudo mysql <<EOF
 DROP USER IF EXISTS 'admin'@'localhost';
 FLUSH PRIVILEGES;
@@ -151,66 +162,64 @@ sudo chown -R root:root /var/www/html
 sudo chmod -R 755 /var/www/html
 sudo systemctl disable mysql
 sudo systemctl stop mysql
-
-sudo systemctl disable apache2
-sudo systemctl stop apache2
-
 sudo apt remove --purge -y php-curl php-mysql certbot python python3 mysql-server phpmyadmin
+fi
 
+#uninstall Apache/Nginx+certbot HTTPS
 if systemctl list-units --type=service | grep -q apache2; then
 sudo systemctl stop apache2
 sudo systemctl disable apache2
+sudo apt remove --purge -y python3-certbot-apache
 sudo apt remove --purge -y apache2 php libapache2-mod-php
-elif systemctl list-units --type=service | grep -q nginx; then
+fi
+
+if systemctl list-units --type=service | grep -q nginx; then
 sudo systemctl stop nginx
 sudo systemctl disable nginx
+
 if systemctl list-units --type=service | grep -q php7.4-fpm; then
     echo "Menonaktifkan service PHP 7.4 FPM..."
     sudo systemctl stop php7.4-fpm
     sudo systemctl disable php7.4-fpm
-elif systemctl list-units --type=service | grep -q php8.1-fpm; then
+fi
+
+if systemctl list-units --type=service | grep -q php8.1-fpm; then
     echo "Menonaktifkan service PHP 8.1 FPM..."
     sudo systemctl stop php8.1-fpm
     sudo systemctl disable php8.1-fpm
-else
-    echo "Service PHP-FPM tidak ditemukan."
 fi
+sudo apt remove --purge -y python3-certbot-nginx
 sudo apt remove --purge -y nginx php-fpm
-else
-    echo "Anda belum menginstal Web Server (Apache atau Nginx)."
 fi
 
-
-sudo apt autoremove -y
-sudo apt autoclean
-
-
-
+#uninstall FTP/FTPS
+if systemctl list-units --type=service | grep -q vsftpd; then
 sudo systemctl stop vsftpd
 sudo systemctl disable vsftpd
-
 sudo rm -f /etc/ssl/certs/vsftpd-selfsigned.crt
 sudo rm -f /etc/ssl/private/vsftpd-selfsigned.key
-
 
 if id "admin" &>/dev/null; then
     echo "Menghapus user admin..."
     sudo userdel -r admin
-else
-    echo "User admin tidak ditemukan, dilewati."
 fi
 
 if [ -f /etc/vsftpd.conf.bak ]; then
     sudo mv /etc/vsftpd.conf.bak /etc/vsftpd.conf
-else
-    echo "Backup vsftpd.conf tidak ditemukan, dilewati."
 fi
+
 sudo rm -f /etc/vsftpd.userlist
-
 sudo apt remove --purge -y vsftpd openssl
+fi
 
+sudo apt autoremove -y
+sudo apt autoclean
 echo "Uninstall selesai!"
-
-
+        n) back to menu
+        ;;
+    *)
+        echo "Pilihan tidak tersedia!"
+        ;;
+esac
 
 

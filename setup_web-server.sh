@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Harus dijalankan sebagai root!"
+    exit 1
+fi
 sudo apt update -y
 sudo apt install php-curl php-mysql certbot python python3 -y
 sudo apt install mysql-server phpmyadmin -y
@@ -24,7 +28,7 @@ echo ""
 echo "1. Install Web Server"
 echo "2. Install FTP/FTPS"
 echo "3. Certificate Web (HTTPS)"
-echo "4. Uninstall"
+echo "4. Uninstall ALL"
 echo ""
 echo "======================================"
 read -p "Masukan input anda: " pilihan
@@ -43,6 +47,8 @@ case $pilihan in
             1)
                 echo "Anda memilih Apache (LAMP)"
                 sudo apt install apache2 php libapache2-mod-php -y
+                sudo systemctl enable apache2
+                sudo systemctl restart apache2
                 ;;
             2)
                 echo "Anda memilih Nginx (LEMP)"
@@ -135,3 +141,51 @@ fi
         echo "Pilihan tidak tersedia!"
         ;;
 esac
+
+sudo mysql <<EOF
+DROP USER IF EXISTS 'admin'@'localhost';
+FLUSH PRIVILEGES;
+EXIT
+EOF
+sudo chown -R root:root /var/www/html
+sudo chmod -R 755 /var/www/html
+sudo systemctl disable mysql
+sudo systemctl stop mysql
+
+sudo systemctl disable apache2
+sudo systemctl stop apache2
+
+sudo apt remove --purge -y php-curl php-mysql certbot python python3 mysql-server phpmyadmin
+
+if systemctl list-units --type=service | grep -q apache2; then
+sudo systemctl stop apache2
+sudo systemctl disable apache2
+sudo apt remove --purge -y apache2 php libapache2-mod-php
+elif systemctl list-units --type=service | grep -q nginx; then
+sudo systemctl stop nginx
+sudo systemctl disable nginx
+if systemctl list-units --type=service | grep -q php7.4-fpm; then
+    echo "Menonaktifkan service PHP 7.4 FPM..."
+    sudo systemctl stop php7.4-fpm
+    sudo systemctl disable php7.4-fpm
+elif systemctl list-units --type=service | grep -q php8.1-fpm; then
+    echo "Menonaktifkan service PHP 8.1 FPM..."
+    sudo systemctl stop php8.1-fpm
+    sudo systemctl disable php8.1-fpm
+else
+    echo "Service PHP-FPM tidak ditemukan."
+fi
+sudo apt remove --purge -y nginx php-fpm
+else
+    echo "Anda belum menginstal Web Server (Apache atau Nginx)."
+fi
+
+
+sudo apt autoremove -y
+sudo apt autoclean
+
+echo "Uninstall selesai!"
+
+
+
+

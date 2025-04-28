@@ -218,3 +218,12 @@ EOF
         ;;
 esac
 done
+
+
+if ! id "web" &>/dev/null; then
+        sudo useradd -m -s /bin/false web || true
+        echo "web:Abcd1234!" | sudo chpasswd
+sudo usermod -aG www-data web
+sudo chown -R web:web /var/www/html
+sudo usermod -d /var/www/html web
+        fi

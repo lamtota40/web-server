@@ -135,6 +135,7 @@ EOF
         ;;
     3)
         echo "Pilihan anda: Install SSL Certificate HTTPS"
+        echo "jika gagal setting DNS tambahkan CAA : 0 issue "letsencrypt.org""
         read -p "Masukkan domain kamu (contoh: example.com): " domain
         email="admin@$domain"
 

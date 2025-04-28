@@ -49,23 +49,7 @@ case $pilihan in
                 sudo apt install apache2 php libapache2-mod-php -y
                 sudo systemctl enable apache2
                 sudo systemctl restart apache2
-                ;;
-            2)
-                echo "Anda memilih Nginx (LEMP)"
-                sudo apt install nginx php-fpm -y
-                sudo systemctl enable nginx
-                sudo systemctl enable php7.4-fpm || sudo systemctl enable php8.1-fpm
-                sudo systemctl restart nginx
-                sudo systemctl restart php7.4-fpm || sudo systemctl restart php8.1-fpm
-                sudo rm -f /var/www/html/index.nginx-debian.html
-                ;;
-            *)
-                read -p "Tekan [Enter] untuk kembali ke menu utama..."
-                ;;
-                read -p "Tekan [Enter] untuk kembali ke menu utama..."
-        esac
-
-        # Lanjut install PHP module, MySQL, dan phpMyAdmin
+                # Lanjut install PHP module, MySQL, dan phpMyAdmin
         sudo apt install php-curl php-mysql certbot python python3 -y
         sudo apt install mysql-server phpmyadmin -y
         sudo chown -R www-data:www-data /var/www/html
@@ -80,6 +64,36 @@ EXIT
 EOF
         sudo systemctl enable mysql
         sudo systemctl restart mysql
+                ;;
+            2)
+                echo "Anda memilih Nginx (LEMP)"
+                sudo apt install nginx php-fpm -y
+                sudo systemctl enable nginx
+                sudo systemctl enable php7.4-fpm || sudo systemctl enable php8.1-fpm
+                sudo systemctl restart nginx
+                sudo systemctl restart php7.4-fpm || sudo systemctl restart php8.1-fpm
+                sudo rm -f /var/www/html/index.nginx-debian.html
+                # Lanjut install PHP module, MySQL, dan phpMyAdmin
+        sudo apt install php-curl php-mysql certbot python python3 -y
+        sudo apt install mysql-server phpmyadmin -y
+        sudo chown -R www-data:www-data /var/www/html
+        sudo chmod -R 755 /var/www/html
+
+        # Setup user MySQL
+        sudo mysql <<EOF
+CREATE USER IF NOT EXISTS 'admin'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
+GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+EXIT
+EOF
+        sudo systemctl enable mysql
+        sudo systemctl restart mysql
+                ;;
+            *)
+                read -p "Tekan [Enter] untuk kembali ke menu utama..."
+                ;;
+                esac
+                read -p "Tekan [Enter] untuk kembali ke menu utama..."
         ;;
     2)
         echo "Pilihan anda: Install FTP/FTPS"

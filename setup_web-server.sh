@@ -32,38 +32,12 @@ case $pilihan in
         echo "2. Nginx (LEMP: Linux + Nginx + MySQL + PHP)"
         echo "======================================"
         read -p "Masukan input anda untuk memilih web server: " webserver
-
-        # Set password MySQL dan phpMyAdmin sebelum install
-        MYSQL_PASSWORD="Abcd1234!"
-        sudo debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_PASSWORD"
-        sudo debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_PASSWORD"
-        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/dbconfig-install boolean true"
-        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/app-password-confirm password $MYSQL_PASSWORD"
-        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/admin-pass password $MYSQL_PASSWORD"
-        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/app-pass password $MYSQL_PASSWORD"
-        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2"
-
         case $webserver in
             1)
                 echo "Anda memilih Apache (LAMP)"
                 sudo apt install apache2 php libapache2-mod-php -y
                 sudo systemctl enable apache2
                 sudo systemctl restart apache2
-                # Lanjut install PHP module, MySQL, dan phpMyAdmin
-        sudo apt install php-curl php-mysql certbot python python3 -y
-        sudo apt install mysql-server phpmyadmin -y
-        sudo chown -R www-data:www-data /var/www/html
-        sudo chmod -R 755 /var/www/html
-
-        # Setup user MySQL
-        sudo mysql <<EOF
-CREATE USER IF NOT EXISTS 'admin'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
-GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-EXIT
-EOF
-        sudo systemctl enable mysql
-        sudo systemctl restart mysql
                 ;;
             2)
                 echo "Anda memilih Nginx (LEMP)"
@@ -73,6 +47,22 @@ EOF
                 sudo systemctl restart nginx
                 sudo systemctl restart php7.4-fpm || sudo systemctl restart php8.1-fpm
                 sudo rm -f /var/www/html/index.nginx-debian.html
+                ;;
+            *)
+                read -p "Tekan [Enter] untuk kembali ke menu utama..."
+                ;;
+                esac
+                if ! systemctl list-units --type=service | grep -q mysql; then
+                # Set password MySQL dan phpMyAdmin sebelum install
+        MYSQL_PASSWORD="Abcd1234!"
+        sudo debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_PASSWORD"
+        sudo debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_PASSWORD"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/dbconfig-install boolean true"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/app-password-confirm password $MYSQL_PASSWORD"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/admin-pass password $MYSQL_PASSWORD"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/app-pass password $MYSQL_PASSWORD"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2"
+
                 # Lanjut install PHP module, MySQL, dan phpMyAdmin
         sudo apt install php-curl php-mysql certbot python python3 -y
         sudo apt install mysql-server phpmyadmin -y
@@ -88,11 +78,15 @@ EXIT
 EOF
         sudo systemctl enable mysql
         sudo systemctl restart mysql
-                ;;
-            *)
-                read -p "Tekan [Enter] untuk kembali ke menu utama..."
-                ;;
-                esac
+fi
+        if ! id "web" &>/dev/null; then
+        sudo useradd -m -s /bin/false web || true
+        echo "web:Abcd1234!" | sudo chpasswd
+sudo usermod -aG www-data web
+sudo chown -R web:web /var/www/html
+sudo usermod -d /var/www/html web
+        fi
+
                 read -p "Tekan [Enter] untuk kembali ke menu utama..."
         ;;
     2)
@@ -218,12 +212,3 @@ EOF
         ;;
 esac
 done
-
-
-if ! id "web" &>/dev/null; then
-        sudo useradd -m -s /bin/false web || true
-        echo "web:Abcd1234!" | sudo chpasswd
-sudo usermod -aG www-data web
-sudo chown -R web:web /var/www/html
-sudo usermod -d /var/www/html web
-        fi

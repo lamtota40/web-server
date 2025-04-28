@@ -194,8 +194,8 @@ EOF
             sudo apt autoclean
             
             #remove user admin
-                if id "admin" &>/dev/null; then
-                    sudo userdel -r admin
+                if id "web" &>/dev/null; then
+                    sudo userdel -r web
                 fi
             echo "Uninstall selesai!..."
             ;;

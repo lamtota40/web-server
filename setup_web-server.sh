@@ -183,12 +183,10 @@ EOF
                 if id "admin" &>/dev/null; then
                     sudo userdel -r admin
                 fi
-            echo "Uninstall selesai!"
-            read -p "Tekan [Enter] untuk kembali ke menu utama..."
+            echo "Uninstall selesai!..."
             ;;
         n|N)
             echo "Batal uninstall..."
-            read -p "Tekan [Enter] untuk kembali ke menu utama..."
             ;;
         *)
             echo "Pilihan tidak valid!"

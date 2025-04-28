@@ -14,8 +14,8 @@ echo "        Menu Instalasi Server         "
 echo "======================================"
 echo ""
 echo "1. Install Web Server"
-echo "2. Install FTP/FTPS"
-echo "3. Certificate Web (HTTPS)"
+echo "2. Certificate Web (HTTPS)"
+echo "3. Install FTP/FTPS"
 echo "4. Uninstall ALL"
 echo "0. Untuk KELUAR"
 echo ""
@@ -96,17 +96,6 @@ EOF
                 read -p "Tekan [Enter] untuk kembali ke menu utama..."
         ;;
     2)
-        echo "Pilihan anda: Install FTP/FTPS"
-        sudo apt install vsftpd -y
-sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.bak
-sudo sed -i 's/#\s*write_enable=YES/write_enable=YES/' /etc/vsftpd.conf
-sudo sed -i 's/#\s*chroot_local_user=YES/chroot_local_user=YES/' /etc/vsftpd.conf
-echo "allow_writeable_chroot=YES" | sudo tee -a /etc/vsftpd.conf
-sudo systemctl restart vsftpd
-sudo systemctl enable vsftpd
-read -p "Tekan [Enter] untuk kembali ke menu utama..."
-        ;;
-    3)
         echo "Pilihan anda: Install SSL Certificate HTTPS"
         echo "jika gagal setting DNS tambahkan CAA : 0 issue "letsencrypt.org""
         read -p "Masukkan domain kamu (contoh: example.com): " domain
@@ -127,6 +116,17 @@ read -p "Tekan [Enter] untuk kembali ke menu utama..."
             echo "Anda belum menginstal Web Server (Apache atau Nginx)."
         fi
         read -p "Tekan [Enter] untuk kembali ke menu utama..."
+        ;;
+            3)
+        echo "Pilihan anda: Install FTP/FTPS"
+        sudo apt install vsftpd -y
+sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.bak
+sudo sed -i 's/#\s*write_enable=YES/write_enable=YES/' /etc/vsftpd.conf
+sudo sed -i 's/#\s*chroot_local_user=YES/chroot_local_user=YES/' /etc/vsftpd.conf
+echo "allow_writeable_chroot=YES" | sudo tee -a /etc/vsftpd.conf
+sudo systemctl restart vsftpd
+sudo systemctl enable vsftpd
+read -p "Tekan [Enter] untuk kembali ke menu utama..."
         ;;
 4)
     read -p "Apakah kamu yakin akan meng-uninstall semua (y/n): " uninstall

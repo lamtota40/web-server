@@ -49,7 +49,6 @@ case $pilihan in
                 sudo apt install apache2 php libapache2-mod-php -y
                 sudo systemctl enable apache2
                 sudo systemctl restart apache2
-                read -p "Tekan [Enter] untuk kembali ke menu utama..."
                 ;;
             2)
                 echo "Anda memilih Nginx (LEMP)"
@@ -59,18 +58,16 @@ case $pilihan in
                 sudo systemctl restart nginx
                 sudo systemctl restart php7.4-fpm || sudo systemctl restart php8.1-fpm
                 sudo rm -f /var/www/html/index.nginx-debian.html
-
-                read -p "Tekan [Enter] untuk kembali ke menu utama..."
                 ;;
             *)
                 read -p "Tekan [Enter] untuk kembali ke menu utama..."
                 ;;
+                read -p "Tekan [Enter] untuk kembali ke menu utama..."
         esac
 
         # Lanjut install PHP module, MySQL, dan phpMyAdmin
         sudo apt install php-curl php-mysql certbot python python3 -y
         sudo apt install mysql-server phpmyadmin -y
-
         sudo chown -R www-data:www-data /var/www/html
         sudo chmod -R 755 /var/www/html
 
@@ -81,7 +78,6 @@ GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 EXIT
 EOF
-
         sudo systemctl enable mysql
         sudo systemctl restart mysql
         ;;

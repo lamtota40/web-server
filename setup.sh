@@ -1,3 +1,50 @@
+#!/bin/bash
+
+clear
+echo "======================================"
+echo "        Menu Instalasi Server         "
+echo "======================================"
+echo ""
+echo "1. Install Web Server"
+echo "   1.1 APACHE (LAMP: Linux + Apache + MySQL + PHP)"
+echo "   1.2 NGINX (LEMP: Linux + Nginx + MySQL + PHP)"
+echo ""
+echo "2. Install FTP/FTPS"
+echo ""
+echo "3. Certificate Web (HTTPS)"
+echo ""
+echo "4. Uninstall"
+echo ""
+echo "======================================"
+read -p "Masukan input anda: " pilihan
+
+case $pilihan in
+    1.1)
+        echo "Pilihan anda: Install LAMP (Apache)"
+        # Nanti di sini kamu isi script instalasi LAMP
+        ;;
+    1.2)
+        echo "Pilihan anda: Install LEMP (Nginx)"
+        # Nanti di sini kamu isi script instalasi LEMP
+        ;;
+    2)
+        echo "Pilihan anda: Install FTP/FTPS"
+        # Nanti di sini kamu isi script instalasi FTP
+        ;;
+    3)
+        echo "Pilihan anda: Install SSL Certificate HTTPS"
+        # Nanti di sini kamu isi script SSL Let's Encrypt
+        ;;
+    4)
+        echo "Pilihan anda: Uninstall semua"
+        # Nanti di sini kamu isi script uninstall
+        ;;
+    *)
+        echo "Pilihan tidak tersedia!"
+        ;;
+esac
+
+
 sudo apt update -y
 sudo apt install apache2 php php-curl libapache2-mod-php php-mysql -y
 sudo apt install mysql-server phpmyadmin -y

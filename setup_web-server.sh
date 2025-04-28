@@ -66,7 +66,7 @@ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -out /etc/ssl/certs/vsftpd-selfsigned.crt \
     -subj "/C=US/ST=State/L=City/O=Organization/OU=IT Department/CN=localhost"
 sudo useradd -m -d /var/www/html -s /bin/bash admin
-echo "admin:Abcd123!" | sudo chpasswd
+echo "admin:Abcd1234!" | sudo chpasswd
 sudo chown -R admin:admin /var/www/html
 sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.bak
 
@@ -108,7 +108,24 @@ sudo systemctl enable vsftpd
         ;;
     3)
         echo "Pilihan anda: Install SSL Certificate HTTPS"
-        # Nanti di sini kamu isi script SSL Let's Encrypt
+read -p "Masukkan domain kamu (contoh: example.com): " domain
+email="admin@$domain"
+
+# Cek apakah apache2 atau nginx terinstall
+if systemctl list-units --type=service | grep -q apache2; then
+    echo "Terdeteksi Apache terinstall."
+    sudo apt install -y python3-certbot-apache
+    sudo certbot --apache --non-interactive --agree-tos --redirect -m "$email" -d "$domain"
+    sudo systemctl restart apache2
+elif systemctl list-units --type=service | grep -q nginx; then
+    echo "Terdeteksi Nginx terinstall."
+    sudo apt install -y python3-certbot-nginx
+    sudo certbot --nginx --non-interactive --agree-tos --redirect -m "$email" -d "$domain"
+    sudo systemctl restart nginx
+else
+    echo "Anda belum menginstal Web Server (Apache atau Nginx)."
+fi
+
         ;;
     4)
         echo "Pilihan anda: Uninstall semua"
@@ -118,15 +135,3 @@ sudo systemctl enable vsftpd
         echo "Pilihan tidak tersedia!"
         ;;
 esac
-
-
-read -p "Masukkan domain kamu (contoh: example.com): " domain
-email="admin@$domain"
-
-sudo apt install python3-certbot-apache -y
-sudo certbot --apache --non-interactive --agree-tos --redirect -m "$email" -d "$domain"
-sudo systemctl restart apache2
-
-apt install python3-certbot-nginx -y
-sudo certbot --nginx --non-interactive --agree-tos --redirect -m "$email" -d "$domain"
-sudo systemctl restart nginx

@@ -62,4 +62,11 @@ echo "admin" | sudo tee /etc/vsftpd.userlist
 sudo systemctl restart vsftpd
 sudo systemctl enable vsftpd
 
+DOMAIN="yourdomain.com"
+EMAIL="youremail@example.com"
+
+sudo apt install -y certbot python3-certbot-apache
+sudo certbot --apache --non-interactive --agree-tos --redirect -m "$EMAIL" -d "$DOMAIN"
+sudo systemctl restart apache2
+
 echo "Web server already instal"

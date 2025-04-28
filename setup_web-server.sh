@@ -154,82 +154,89 @@ EOF
             echo "Anda belum menginstal Web Server (Apache atau Nginx)."
         fi
         ;;
-    4)
-        read -p "Apakah kamu yakin akan mengunistall semuanya (y/n): " uninstall
-        case $uninstall in
-            y|Y)
-                echo "Mulai proses uninstall..."
+4)
+    read -p "Apakah kamu yakin akan meng-uninstall semua (y/n): " uninstall
+    case $uninstall in
+        y|Y)
+            echo "Mulai proses uninstall..."
 
-                # Uninstall MySQL dan phpMyAdmin
-                if systemctl list-units --type=service | grep -q mysql; then
-                    sudo mysql <<EOF
+            # Uninstall MySQL dan PHPMyAdmin
+            if systemctl list-units --type=service | grep -q mysql; then
+                echo "Uninstalling MySQL dan PHPMyAdmin..."
+                sudo mysql <<EOF
 DROP USER IF EXISTS 'admin'@'localhost';
 FLUSH PRIVILEGES;
 EXIT
 EOF
-                    sudo chown -R root:root /var/www/html
-                    sudo chmod -R 755 /var/www/html
-                    sudo systemctl disable mysql
-                    sudo systemctl stop mysql
-                    sudo apt remove --purge -y php-curl php-mysql certbot python python3 mysql-server phpmyadmin
+                sudo chown -R root:root /var/www/html
+                sudo chmod -R 755 /var/www/html
+                sudo systemctl disable mysql
+                sudo systemctl stop mysql
+                sudo DEBIAN_FRONTEND=noninteractive apt remove --purge -y php-curl php-mysql certbot python python3 mysql-server phpmyadmin
+            fi
+
+            # Uninstall Apache
+            if systemctl list-units --type=service | grep -q apache2; then
+                echo "Uninstalling Apache..."
+                sudo systemctl stop apache2
+                sudo systemctl disable apache2
+                sudo apt remove --purge -y python3-certbot-apache
+                sudo apt remove --purge -y apache2 php libapache2-mod-php
+            fi
+
+            # Uninstall Nginx + PHP-FPM
+            if systemctl list-units --type=service | grep -q nginx; then
+                echo "Uninstalling Nginx dan PHP-FPM..."
+                sudo systemctl stop nginx
+                sudo systemctl disable nginx
+
+                if systemctl list-units --type=service | grep -q php7.4-fpm; then
+                    sudo systemctl stop php7.4-fpm
+                    sudo systemctl disable php7.4-fpm
                 fi
 
-                # Uninstall Apache
-                if systemctl list-units --type=service | grep -q apache2; then
-                    sudo systemctl stop apache2
-                    sudo systemctl disable apache2
-                    sudo apt remove --purge -y python3-certbot-apache apache2 php libapache2-mod-php
+                if systemctl list-units --type=service | grep -q php8.1-fpm; then
+                    sudo systemctl stop php8.1-fpm
+                    sudo systemctl disable php8.1-fpm
                 fi
 
-                # Uninstall Nginx
-                if systemctl list-units --type=service | grep -q nginx; then
-                    sudo systemctl stop nginx
-                    sudo systemctl disable nginx
+                sudo apt remove --purge -y python3-certbot-nginx
+                sudo apt remove --purge -y nginx php-fpm
+            fi
 
-                    if systemctl list-units --type=service | grep -q php7.4-fpm; then
-                        sudo systemctl stop php7.4-fpm
-                        sudo systemctl disable php7.4-fpm
-                    fi
+            # Uninstall FTP/FTPS (vsftpd)
+            if systemctl list-units --type=service | grep -q vsftpd; then
+                echo "Uninstalling FTP/FTPS..."
+                sudo systemctl stop vsftpd
+                sudo systemctl disable vsftpd
+                sudo rm -f /etc/ssl/certs/vsftpd-selfsigned.crt
+                sudo rm -f /etc/ssl/private/vsftpd-selfsigned.key
 
-                    if systemctl list-units --type=service | grep -q php8.1-fpm; then
-                        sudo systemctl stop php8.1-fpm
-                        sudo systemctl disable php8.1-fpm
-                    fi
-
-                    sudo apt remove --purge -y python3-certbot-nginx nginx php-fpm
+                if id "admin" &>/dev/null; then
+                    sudo userdel -r admin
                 fi
 
-                # Uninstall FTP/FTPS
-                if systemctl list-units --type=service | grep -q vsftpd; then
-                    sudo systemctl stop vsftpd
-                    sudo systemctl disable vsftpd
-                    sudo rm -f /etc/ssl/certs/vsftpd-selfsigned.crt
-                    sudo rm -f /etc/ssl/private/vsftpd-selfsigned.key
-
-                    if id "admin" &>/dev/null; then
-                        sudo userdel -r admin
-                    fi
-
-                    if [ -f /etc/vsftpd.conf.bak ]; then
-                        sudo mv /etc/vsftpd.conf.bak /etc/vsftpd.conf
-                    fi
-
-                    sudo rm -f /etc/vsftpd.userlist
-                    sudo apt remove --purge -y vsftpd openssl
+                if [ -f /etc/vsftpd.conf.bak ]; then
+                    sudo mv /etc/vsftpd.conf.bak /etc/vsftpd.conf
                 fi
 
-                sudo apt autoremove -y
-                sudo apt autoclean
-                echo "Uninstall selesai!"
-                ;;
-            n|N)
-                echo "Uninstall dibatalkan."
-                ;;
-            *)
-                echo "Pilihan tidak tersedia!"
-                ;;
-        esac
-        ;;
+                sudo rm -f /etc/vsftpd.userlist
+                sudo apt remove --purge -y vsftpd openssl
+            fi
+
+            # Cleanup
+            sudo apt autoremove -y
+            sudo apt autoclean
+            echo "Uninstall selesai!"
+            ;;
+        n|N)
+            echo "Batal uninstall. Kembali ke menu..."
+            ;;
+        *)
+            echo "Pilihan tidak valid!"
+            ;;
+    esac
+    ;;
     *)
         echo "Pilihan tidak tersedia!"
         ;;

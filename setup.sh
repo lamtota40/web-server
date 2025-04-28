@@ -73,3 +73,32 @@ sudo certbot --apache --non-interactive --agree-tos --redirect -m "$email" -d "$
 sudo systemctl restart apache2
 
 echo "Web server already instal"
+
+
+
+sudo apt install -y nginx
+
+# Install MySQL Server
+sudo apt install -y mysql-server
+
+# Install PHP dan modul pendukung untuk Nginx
+sudo apt install -y php-fpm php-mysql
+
+# Aktifkan Nginx dan MySQL saat boot
+sudo systemctl enable nginx
+sudo systemctl enable mysql
+sudo systemctl enable php7.4-fpm || sudo systemctl enable php8.1-fpm
+
+# Restart semua service
+sudo systemctl restart nginx
+sudo systemctl restart mysql
+sudo systemctl restart php7.4-fpm || sudo systemctl restart php8.1-fpm
+
+# Set izin folder default Nginx
+sudo chown -R www-data:www-data /var/www/html
+sudo chmod -R 755 /var/www/html
+
+# Hapus file index.html bawaan
+sudo rm -f /var/www/html/index.nginx-debian.html
+
+

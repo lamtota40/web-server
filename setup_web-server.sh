@@ -138,7 +138,7 @@ read -p "Tekan [Enter] untuk kembali ke menu utama..."
             if systemctl list-units --type=service | grep -q mysql; then
                 echo "Uninstalling MySQL dan PHPMyAdmin..."
                 sudo mysql <<EOF
-DROP USER IF EXISTS 'admin'@'LEGES;
+DROP USER IF EXISTS 'web'@'LEGES;
 EXIT
 EOF
                 sudo chown -R root:root /var/www/html

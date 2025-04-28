@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Pastikan script dijalankan sebagai root
 if [ "$(id -u)" -ne 0 ]; then
     echo "Harus dijalankan sebagai root!"
     exit 1
@@ -8,14 +7,13 @@ fi
 
 sudo apt update -y
 clear
-
 echo "======================================"
 echo "        Menu Instalasi Server         "
 echo "======================================"
 echo ""
 echo "1. Install Web Server"
 echo "2. Install FTP/FTPS"
-echo "3. Install Certificate Web (HTTPS)"
+echo "3. Certificate Web (HTTPS)"
 echo "4. Uninstall ALL"
 echo ""
 echo "======================================"
@@ -31,27 +29,23 @@ case $pilihan in
         echo "2. Nginx (LEMP: Linux + Nginx + MySQL + PHP)"
         echo "======================================"
         read -p "Masukan input anda untuk memilih web server: " webserver
+
+        # Set password MySQL dan phpMyAdmin sebelum install
+        MYSQL_PASSWORD="Abcd1234!"
+        sudo debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_PASSWORD"
+        sudo debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_PASSWORD"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/dbconfig-install boolean true"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/app-password-confirm password $MYSQL_PASSWORD"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/admin-pass password $MYSQL_PASSWORD"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/app-pass password $MYSQL_PASSWORD"
+        sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2"
+
         case $webserver in
             1)
                 echo "Anda memilih Apache (LAMP)"
                 sudo apt install apache2 php libapache2-mod-php -y
                 sudo systemctl enable apache2
                 sudo systemctl restart apache2
-
-                sudo apt install php-curl php-mysql certbot python python3 -y
-                sudo apt install mysql-server phpmyadmin -y
-
-                sudo chown -R www-data:www-data /var/www/html
-                sudo chmod -R 755 /var/www/html
-
-                sudo mysql <<EOF
-CREATE USER 'admin'@'localhost' IDENTIFIED BY 'Abcd1234!';
-GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-EXIT
-EOF
-                sudo systemctl enable mysql
-                sudo systemctl restart mysql
                 ;;
             2)
                 echo "Anda memilih Nginx (LEMP)"
@@ -62,36 +56,42 @@ EOF
                 sudo systemctl restart php7.4-fpm || sudo systemctl restart php8.1-fpm
                 sudo rm -f /var/www/html/index.nginx-debian.html
 
-                sudo apt install php-curl php-mysql certbot python python3 -y
-                sudo apt install mysql-server phpmyadmin -y
+                # Untuk phpmyadmin di nginx nanti perlu konfigurasi manual
+                ;;
+            *)
+                echo "Pilihan tidak tersedia!"
+                exit 1
+                ;;
+        esac
 
-                sudo chown -R www-data:www-data /var/www/html
-                sudo chmod -R 755 /var/www/html
+        # Lanjut install PHP module, MySQL, dan phpMyAdmin
+        sudo apt install php-curl php-mysql certbot python python3 -y
+        sudo apt install mysql-server phpmyadmin -y
 
-                sudo mysql <<EOF
-CREATE USER 'admin'@'localhost' IDENTIFIED BY 'Abcd1234!';
+        sudo chown -R www-data:www-data /var/www/html
+        sudo chmod -R 755 /var/www/html
+
+        # Setup user MySQL
+        sudo mysql <<EOF
+CREATE USER IF NOT EXISTS 'admin'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
 GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 EXIT
 EOF
-                sudo systemctl enable mysql
-                sudo systemctl restart mysql
-                ;;
-            *)
-                echo "Pilihan tidak tersedia!"
-                ;;
-        esac
+
+        sudo systemctl enable mysql
+        sudo systemctl restart mysql
         ;;
     2)
-        clear
         echo "Pilihan anda: Install FTP/FTPS"
         sudo apt install vsftpd openssl -y
+
         sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
             -keyout /etc/ssl/private/vsftpd-selfsigned.key \
             -out /etc/ssl/certs/vsftpd-selfsigned.crt \
             -subj "/C=US/ST=State/L=City/O=Organization/OU=IT Department/CN=localhost"
 
-        sudo useradd -m -d /var/www/html -s /bin/bash admin
+        sudo useradd -m -d /var/www/html -s /bin/bash admin || true
         echo "admin:Abcd1234!" | sudo chpasswd
         sudo chown -R admin:admin /var/www/html
         sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.bak
@@ -120,11 +120,12 @@ ssl_sslv3=NO
 rsa_cert_file=/etc/ssl/certs/vsftpd-selfsigned.crt
 rsa_private_key_file=/etc/ssl/private/vsftpd-selfsigned.key
 
-# Userlist settings
+# Pasang userlist
 userlist_enable=YES
 userlist_file=/etc/vsftpd.userlist
 userlist_deny=NO
 
+# Port 21
 listen_port=21
 EOF
 
@@ -133,11 +134,11 @@ EOF
         sudo systemctl enable vsftpd
         ;;
     3)
-        clear
-        echo "Pilihan anda: Install SSL Certificate (HTTPS)"
+        echo "Pilihan anda: Install SSL Certificate HTTPS"
         read -p "Masukkan domain kamu (contoh: example.com): " domain
         email="admin@$domain"
 
+        # Cek apakah apache2 atau nginx terinstall
         if systemctl list-units --type=service | grep -q apache2; then
             echo "Terdeteksi Apache terinstall."
             sudo apt install -y python3-certbot-apache
@@ -153,13 +154,12 @@ EOF
         fi
         ;;
     4)
-        clear
-        read -p "Apakah kamu yakin akan menguninstall semuanya? (y/n): " uninstall
+        read -p "Apakah kamu yakin akan mengunistall semuanya (y/n): " uninstall
         case $uninstall in
-            y)
+            y|Y)
                 echo "Mulai proses uninstall..."
 
-                # Uninstall MySQL
+                # Uninstall MySQL dan phpMyAdmin
                 if systemctl list-units --type=service | grep -q mysql; then
                     sudo mysql <<EOF
 DROP USER IF EXISTS 'admin'@'localhost';
@@ -177,8 +177,7 @@ EOF
                 if systemctl list-units --type=service | grep -q apache2; then
                     sudo systemctl stop apache2
                     sudo systemctl disable apache2
-                    sudo apt remove --purge -y python3-certbot-apache
-                    sudo apt remove --purge -y apache2 php libapache2-mod-php
+                    sudo apt remove --purge -y python3-certbot-apache apache2 php libapache2-mod-php
                 fi
 
                 # Uninstall Nginx
@@ -190,13 +189,13 @@ EOF
                         sudo systemctl stop php7.4-fpm
                         sudo systemctl disable php7.4-fpm
                     fi
+
                     if systemctl list-units --type=service | grep -q php8.1-fpm; then
                         sudo systemctl stop php8.1-fpm
                         sudo systemctl disable php8.1-fpm
                     fi
 
-                    sudo apt remove --purge -y python3-certbot-nginx
-                    sudo apt remove --purge -y nginx php-fpm
+                    sudo apt remove --purge -y python3-certbot-nginx nginx php-fpm
                 fi
 
                 # Uninstall FTP/FTPS
@@ -218,19 +217,15 @@ EOF
                     sudo apt remove --purge -y vsftpd openssl
                 fi
 
-                # Bersihkan sistem
                 sudo apt autoremove -y
                 sudo apt autoclean
                 echo "Uninstall selesai!"
-                exit 0
                 ;;
-            n)
-                echo "Dibatalkan."
-                exit 0
+            n|N)
+                echo "Uninstall dibatalkan."
                 ;;
             *)
                 echo "Pilihan tidak tersedia!"
-                exit 1
                 ;;
         esac
         ;;

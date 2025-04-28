@@ -84,54 +84,16 @@ EOF
         ;;
     2)
         echo "Pilihan anda: Install FTP/FTPS"
-        sudo apt install vsftpd openssl -y
-
-        sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-            -keyout /etc/ssl/private/vsftpd-selfsigned.key \
-            -out /etc/ssl/certs/vsftpd-selfsigned.crt \
-            -subj "/C=US/ST=State/L=City/O=Organization/OU=IT Department/CN=localhost"
-
+        sudo apt install vsftpd -y
+sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.bak
+sudo sed -i 's/#\s*write_enable=YES/write_enable=YES/' /etc/vsftpd.conf
+sudo sed -i 's/#\s*chroot_local_user=YES/chroot_local_user=YES/' /etc/vsftpd.conf
+echo "allow_writeable_chroot=YES" | sudo tee -a /etc/vsftpd.conf
+sudo systemctl restart vsftpd
+sudo systemctl enable vsftpd
         sudo useradd -m -d /var/www/html -s /bin/bash admin || true
         echo "admin:Abcd1234!" | sudo chpasswd
         sudo chown -R admin:admin /var/www/html
-        sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.bak
-
-        sudo bash -c 'cat > /etc/vsftpd.conf' <<EOF
-listen=YES
-listen_ipv6=NO
-anonymous_enable=NO
-local_enable=YES
-write_enable=YES
-local_umask=022
-dirmessage_enable=YES
-use_localtime=YES
-xferlog_enable=YES
-connect_from_port_20=YES
-chroot_local_user=YES
-
-# SSL Settings
-ssl_enable=YES
-allow_anon_ssl=NO
-force_local_data_ssl=YES
-force_local_logins_ssl=YES
-ssl_tlsv1=YES
-ssl_sslv2=NO
-ssl_sslv3=NO
-rsa_cert_file=/etc/ssl/certs/vsftpd-selfsigned.crt
-rsa_private_key_file=/etc/ssl/private/vsftpd-selfsigned.key
-
-# Pasang userlist
-userlist_enable=YES
-userlist_file=/etc/vsftpd.userlist
-userlist_deny=NO
-
-# Port 21
-listen_port=21
-EOF
-
-        echo "admin" | sudo tee /etc/vsftpd.userlist
-        sudo systemctl restart vsftpd
-        sudo systemctl enable vsftpd
         ;;
     3)
         echo "Pilihan anda: Install SSL Certificate HTTPS"
@@ -209,9 +171,7 @@ EOF
                 echo "Uninstalling FTP/FTPS..."
                 sudo systemctl stop vsftpd
                 sudo systemctl disable vsftpd
-                sudo rm -f /etc/ssl/certs/vsftpd-selfsigned.crt
-                sudo rm -f /etc/ssl/private/vsftpd-selfsigned.key
-
+                
                 if id "admin" &>/dev/null; then
                     sudo userdel -r admin
                 fi
@@ -219,9 +179,7 @@ EOF
                 if [ -f /etc/vsftpd.conf.bak ]; then
                     sudo mv /etc/vsftpd.conf.bak /etc/vsftpd.conf
                 fi
-
-                sudo rm -f /etc/vsftpd.userlist
-                sudo apt remove --purge -y vsftpd openssl
+                sudo apt remove --purge -y vsftpd
             fi
 
             # Cleanup

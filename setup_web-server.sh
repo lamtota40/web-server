@@ -6,11 +6,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 sudo apt update -y
-if ! id "admin" &>/dev/null; then
-        sudo useradd -m -d /var/www/html -s /bin/bash admin || true
-        echo "admin:Abcd1234!" | sudo chpasswd
-        sudo chown -R admin:admin /var/www/html
-        fi
+
 clear
 echo "======================================"
 echo "        Menu Instalasi Server         "

@@ -2,6 +2,9 @@ sudo apt update -y
 sudo apt install apache2 php php-curl libapache2-mod-php php-mysql -y
 sudo apt install mysql-server phpmyadmin -y
 
+sudo chown -R www-data:www-data /var/www/html
+sudo chmod -R 755 /var/www/html
+
 sudo mysql <<EOF
 CREATE USER 'admin'@'localhost' IDENTIFIED BY 'Abcd1234!';
 GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;

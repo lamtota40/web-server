@@ -80,7 +80,7 @@ EOF
         sudo systemctl restart mysql
 fi
         if ! id "web" &>/dev/null; then
-        sudo useradd -m -s /bin/false web || true
+        sudo useradd -m -s /bin/bash web || true
         echo "web:Abcd1234!" | sudo chpasswd
 sudo usermod -aG www-data web
 sudo chown -R web:web /var/www/html

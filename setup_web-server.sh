@@ -133,7 +133,7 @@ EOF
                     echo "Mulai proses uninstall..."
 
                     if systemctl list-units --type=service | grep -q mysql; then
-                        mysql <<EOF
+                        mysql -u root -p"$MYSQL_PASSWORD" <<EOF
 DROP USER IF EXISTS 'web'@'localhost';
 EXIT
 EOF

@@ -83,7 +83,7 @@ EOF
 
             if ! id "web" &>/dev/null; then
                 useradd -m -s /bin/bash web
-                echo "web:$MYSQL_PASSWORD!" | chpasswd
+                echo "web:$MYSQL_PASSWORD" | chpasswd
                 usermod -aG www-data web
                 chown -R web:web /var/www/html
                 usermod -d /var/www/html web

@@ -75,7 +75,7 @@ while true; do
 CREATE USER IF NOT EXISTS 'web'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
 GRANT ALL PRIVILEGES ON *.* TO 'web'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
-EXIT;
+EXIT
 EOF
                 systemctl enable mysql
                 systemctl restart mysql
@@ -135,6 +135,7 @@ EOF
                     if systemctl list-units --type=service | grep -q mysql; then
                         mysql <<EOF
 DROP USER IF EXISTS 'web'@'localhost';
+EXIT
 EOF
                         chown -R root:root /var/www/html
                         chmod -R 755 /var/www/html

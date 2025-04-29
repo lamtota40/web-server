@@ -71,11 +71,11 @@ while true; do
                 chown -R www-data:www-data /var/www/html
                 chmod -R 755 /var/www/html
 
-                mysql <<EOF
+                mysql -u root -p"$MYSQL_PASSWORD" <<EOF
 CREATE USER IF NOT EXISTS 'web'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
 GRANT ALL PRIVILEGES ON *.* TO 'web'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
-EXIT
+EXIT;
 EOF
                 systemctl enable mysql
                 systemctl restart mysql

@@ -75,6 +75,7 @@ while true; do
 CREATE USER IF NOT EXISTS 'web'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';
 GRANT ALL PRIVILEGES ON *.* TO 'web'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
+EXIT;
 EOF
                 systemctl enable mysql
                 systemctl restart mysql

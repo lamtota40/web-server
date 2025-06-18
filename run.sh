@@ -23,11 +23,6 @@ EXIT
 EOF
 
 #sudo mysql_secure_installation
-apt install -y vsftpd
-cp /etc/vsftpd.conf /etc/vsftpd.conf.bak
-sed -i 's/#\s*write_enable=YES/write_enable=YES/' /etc/vsftpd.conf
-sed -i 's/#\s*chroot_local_user=YES/chroot_local_user=YES/' /etc/vsftpd.conf
-echo "allow_writeable_chroot=YES" | tee -a /etc/vsftpd.conf
 
 sudo systemctl daemon-reload
 sudo systemctl enable apache2
@@ -35,5 +30,46 @@ sudo systemctl enable mysql
 sudo systemctl restart apache2
 sudo systemctl restart mysql
 
-systemctl restart vsftpd
-systemctl enable vsftpd
+# Buat user "web" tanpa akses shell
+useradd -m -s /usr/sbin/nologin web
+echo "web:Abcd1234!" | chpasswd
+sudo usermod -aG www-data web
+# Buat folder chroot & upload
+mkdir -p /home/web/html
+
+# Atur permission chroot
+chown root:root /home/web
+chmod 755 /home/web
+
+# Pastikan folder target milik user
+chown -R web:web /home/web/html
+
+# Hapus isi folder html (kosongkan link jika sudah ada)
+rm -rf /home/web/html
+
+# Buat symlink ke /var/www/html
+ln -s /var/www/html /home/web/html
+
+# Atur pemilik direktori web (agar root punya akses penuh, grup untuk www-data)
+sudo chown -R root:www-data /var/www/html
+
+# Edit sshd_config jika belum ada config match
+if ! grep -q "Match User web" /etc/ssh/sshd_config; then
+cat <<EOF >> /etc/ssh/sshd_config
+
+Match User web
+  ChrootDirectory /home/web
+  ForceCommand internal-sftp
+  AllowTcpForwarding no
+  X11Forwarding no
+EOF
+fi
+
+# Restart SSH
+systemctl restart ssh
+
+ls -ld /var/www/html
+groups web
+echo "✅ SFTP user 'web' berhasil dibuat."
+echo "📂 Folder: /home/web/html → /var/www/html"
+echo "🔐 Gunakan di FileZilla/SFTP: user=web, pass=Abcd1234!"

@@ -13,6 +13,7 @@ DEBIAN_FRONTEND=noninteractive apt install -y phpmyadmin
 
 sudo chown -R www-data:www-data /var/www/html
 sudo chmod -R 755 /var/www/html
+sudo a2enmod rewrite
 
 sudo mysql <<EOF
 CREATE USER 'admin'@'localhost' IDENTIFIED BY 'Abcd1234!';

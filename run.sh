@@ -67,6 +67,6 @@ fi
 # Restart SSH
 systemctl restart ssh
 
-echo "✅ SFTP user 'web' berhasil dibuat dan bisa write ke /var/www/html"
-echo "📂 Folder: /home/web/html → bind mount ke /var/www/html"
-echo "🔐 Gunakan di FileZilla/SFTP: user=web, pass=$pass"
+# Pasang HTTPS
+sudo apt install -y cron certbot python3-certbot-apache
+sudo certbot --apache -d namadomain.com -d www.namadomain.com

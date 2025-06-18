@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sudo apt update
 sudo apt install -y apache2 php php-curl libapache2-mod-php php-mysql mysql-server
 
@@ -11,3 +13,18 @@ DEBIAN_FRONTEND=noninteractive apt install -y phpmyadmin
 
 sudo chown -R www-data:www-data /var/www/html
 sudo chmod -R 755 /var/www/html
+
+sudo mysql <<EOF
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'Abcd1234!';
+GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+EXIT
+EOF
+
+#sudo mysql_secure_installation
+
+sudo systemctl daemon-reload
+sudo systemctl enable apache2
+sudo systemctl enable mysql
+sudo systemctl start apache2
+sudo systemctl start mysql

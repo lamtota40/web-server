@@ -22,9 +22,17 @@ EXIT
 EOF
 
 #sudo mysql_secure_installation
+apt install -y vsftpd
+cp /etc/vsftpd.conf /etc/vsftpd.conf.bak
+sed -i 's/#\s*write_enable=YES/write_enable=YES/' /etc/vsftpd.conf
+sed -i 's/#\s*chroot_local_user=YES/chroot_local_user=YES/' /etc/vsftpd.conf
+echo "allow_writeable_chroot=YES" | tee -a /etc/vsftpd.conf
 
 sudo systemctl daemon-reload
 sudo systemctl enable apache2
 sudo systemctl enable mysql
 sudo systemctl restart apache2
 sudo systemctl restart mysql
+
+systemctl restart vsftpd
+systemctl enable vsftpd

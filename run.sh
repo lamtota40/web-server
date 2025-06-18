@@ -67,6 +67,12 @@ fi
 # Restart SSH
 systemctl restart ssh
 
+
+read -p "Masukkan domain kamu (contoh: example.com): " domain
+email="admin@$domain"
+
 # Pasang HTTPS
 sudo apt install -y cron certbot python3-certbot-apache
-sudo certbot --apache -d namadomain.com -d www.namadomain.com
+sudo certbot --apache --non-interactive --agree-tos --redirect -m "$email" -d "$domain" -d "www.$domain"
+sudo systemctl restart apache2
+

@@ -68,8 +68,6 @@ fi
 # Restart SSH
 systemctl restart ssh
 
-ls -ld /var/www/html
-groups web
 echo "✅ SFTP user 'web' berhasil dibuat."
 echo "📂 Folder: /home/web/html → /var/www/html"
 echo "🔐 Gunakan di FileZilla/SFTP: user=web, pass=Abcd1234!"

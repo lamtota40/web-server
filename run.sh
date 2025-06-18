@@ -67,9 +67,6 @@ fi
 # Restart SSH
 systemctl restart ssh
 
-# Verifikasi dan informasi
-ls -ld /var/www/html
-groups web
 echo "✅ SFTP user 'web' berhasil dibuat dan bisa write ke /var/www/html"
 echo "📂 Folder: /home/web/html → bind mount ke /var/www/html"
 echo "🔐 Gunakan di FileZilla/SFTP: user=web, pass=$pass"

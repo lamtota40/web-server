@@ -26,5 +26,5 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable apache2
 sudo systemctl enable mysql
-sudo systemctl start apache2
-sudo systemctl start mysql
+sudo systemctl restart apache2
+sudo systemctl restart mysql

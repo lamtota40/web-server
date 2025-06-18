@@ -8,3 +8,6 @@ echo "phpmyadmin phpmyadmin/mysql/admin-pass password $pass" | debconf-set-selec
 echo "phpmyadmin phpmyadmin/mysql/app-pass password $pass" | debconf-set-selections
 echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | debconf-set-selections
 DEBIAN_FRONTEND=noninteractive apt install -y phpmyadmin
+
+sudo chown -R www-data:www-data /var/www/html
+sudo chmod -R 755 /var/www/html

@@ -16,6 +16,9 @@ cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.
 sudo /usr/share/phpmyadmin/config.inc.php
 
 $cfg['blowfish_secret'] = 'g45hfS5jghG#lkj34lklkj3345jkfsd'; // minimal 32 karakter acak
+
+sudo chown -R www-data:www-data /usr/share/phpmyadmin
+
 sudo phpenmod mbstring
 
 sudo systemctl daemon-reload

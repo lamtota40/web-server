@@ -24,6 +24,7 @@ sudo chown -R www-data:www-data /usr/share/phpmyadmin
 sudo chown -R root:www-data /var/www/html
 sudo chmod -R 775 /var/www/html
 sudo chmod g+s /var/www/html
+sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
 sudo a2enmod rewrite
 sudo phpenmod mbstring
 

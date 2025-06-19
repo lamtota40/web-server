@@ -76,3 +76,6 @@ sudo apt install -y cron certbot python3-certbot-apache
 sudo certbot --apache --non-interactive --agree-tos --redirect -m "$email" -d "$domain" -d "www.$domain"
 sudo systemctl restart apache2
 
+sudo mv /usr/share/phpmyadmin /usr/share/phpmyadmin-old
+cp /usr/share/phpmyadmin-old/config.sample.inc.php /usr/share/phpmyadmin-old/config.inc.php
+

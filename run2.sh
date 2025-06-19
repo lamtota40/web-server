@@ -38,6 +38,27 @@ FLUSH PRIVILEGES;
 EXIT
 EOF
 
+#melindungi agar folder yang tidak memiliki index
+CONF_FILE="/etc/apache2/sites-available/000-default.conf"
+WEB_ROOT="/var/www/html"
+HTACCESS_FILE="$WEB_ROOT/.htaccess"
+
+# Tambahkan blok <Directory> jika belum ada
+if ! grep -q "<Directory $WEB_ROOT>" "$CONF_FILE"; then
+    echo "[+] Menambahkan blok <Directory> ke $CONF_FILE"
+    sudo sed -i "/<\/VirtualHost>/i\\
+<Directory $WEB_ROOT>\n\
+    Options -Indexes +FollowSymLinks\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>\n" "$CONF_FILE"
+else
+    echo "[✓] Blok <Directory> sudah ada, dilewati."
+fi
+
+# Buat .htaccess jika belum ada
+[ ! -f "$HTACCESS_FILE" ] && echo "Options -Indexes" | sudo tee "$HTACCESS_FILE" > /dev/null || true
+
 sudo systemctl daemon-reload
 sudo systemctl enable apache2
 sudo systemctl enable mysql

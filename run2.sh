@@ -12,8 +12,8 @@ sudo mv phpMyAdmin-5.2.1-all-languages phpmyadmin
 rm -rf phpMyAdmin-5.2.1-all-languages.tar.gz
 cd
 
-cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
-sudo /usr/share/phpmyadmin/config.inc.php
+cp /phpmyadmin/config.sample.inc.php /phpmyadmin/config.inc.php
+sudo nano /phpmyadmin/config.inc.php
 
 $cfg['blowfish_secret'] = 'g45hfS5jghG#lkj34lklkj3345jkfsd'; // minimal 32 karakter acak
 

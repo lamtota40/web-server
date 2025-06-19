@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Update dan install webserver stack
+pass="Abcd1234!"
+
 sudo apt update
 sudo apt install apache2 php php-curl php-mbstring php-zip php-gd php-json php-mysql libapache2-mod-php mysql-server -y
 

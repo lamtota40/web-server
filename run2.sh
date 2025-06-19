@@ -1,4 +1,6 @@
 #!/bin/bash
+rm -rf /usr/share/phpmyadmin/config.inc.php
+sudo cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
 
 # Update dan install webserver stack
 pass="Abcd1234!"

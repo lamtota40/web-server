@@ -15,11 +15,9 @@ sudo tar -xvzf phpMyAdmin-5.2.1-all-languages.tar.gz
 sudo mv phpMyAdmin-5.2.1-all-languages phpmyadmin
 cp phpmyadmin/config.sample.inc.php phpmyadmin/config.inc.php
 rm -rf phpMyAdmin-5.2.1-all-languages.tar.gz
-sudo nano phpmyadmin/config.inc.php
+# Ganti string kosong dengan string acak 32 karakter (huruf dan angka)
+sed -i "s|\(\$cfg\['blowfish_secret'\] = \)''|\1'$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)'|" phpmyadmin/config.inc.php
 cd
-
-$cfg['blowfish_secret'] = 'g45hfS5jghG#lkj34lklkj3345jkfsd'; // minimal 32 karakter acak
-$cfg['blowfish_secret'] = '';
 
 # Atur permission dasar folder web
 sudo chown -R www-data:www-data /usr/share/phpmyadmin

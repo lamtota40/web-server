@@ -20,6 +20,7 @@ sed -i "s|\(\$cfg\['blowfish_secret'\] = \)''|\1'$(tr -dc A-Za-z0-9 </dev/urando
 cd
 
 # Atur permission dasar folder web
+mysql -u root -p < /usr/share/phpmyadmin/sql/create_tables.sql
 sudo chown -R www-data:www-data /usr/share/phpmyadmin
 sudo chown -R root:www-data /var/www/html
 sudo chmod -R 775 /var/www/html
